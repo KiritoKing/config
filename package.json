@@ -1,0 +1,17 @@
+{
+  "name": "personal-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "packageManager": "pnpm@11.7.0",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "rules:generate": "node scripts/rules.mjs generate --source . --output rules/generated/AGENTS.md",
+    "rules:check": "node scripts/rules.mjs check --source . --output rules/generated/AGENTS.md"
+  },
+  "dependencies": {
+    "js-tiktoken": "1.0.21",
+    "yaml": "2.8.1"
+  }
+}

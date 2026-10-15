@@ -1,0 +1,14 @@
+version: 1
+defaults:
+  profile: default
+  placement: tail
+  max_tokens: 2000
+  tokenizer: o200k_base
+profiles:
+  default:
+    sections: ["*"]
+
+# * 或未指定 sections：按 section 文件名的字典序。
+# 显式 sections 数组：按数组顺序。
+# 新增块默认放 tail，可通过 --placement head 放到文件开头。
+# 已有托管块原位更新，块外内容不改。
