@@ -8,10 +8,10 @@
 - `rules/config.yaml`：profiles、稳定顺序、tokenizer 与预算。
 - `rules/generated/AGENTS.md`：可复现的 default 通用快照；不手改托管内容。
 - `rules/generated/codex/AGENTS.md`：通用规则加 `codex-subagents` 的 Codex 专用快照。
-- `rules/generated/agy/AGENTS.md`：通用规则加 `agy-delegation`、`agy-paseo` 的 AGY 专用快照。
+- `rules/generated/agy/AGENTS.md`：通用规则加 `agy-delegation`、`agy-paseo`、`agy-skills` 的 AGY 专用快照。
 - `scripts/rules.mjs`：小型、确定性的生成/检查入口。没有模型调用、后台同步、自动软链接安装或账号配置操作。
 
-通用 default 只选 `assets`、`cost`、`execution`、`security`；codex profile 额外选 `codex-subagents`；agy profile 额外选 `agy-delegation`、`agy-paseo`。AGY 沿用宿主已有 Paseo profiles 与 notes，不在规则中另设模型或 effort 默认值。`paseo-workflow` 仍仅保存，不选入任何已启用快照，也不注入 Paseo。项目、技术栈和业务专属内容不进入通用快照。
+通用 default 只选 `assets`、`cost`、`execution`、`security`；codex profile 额外选 `codex-subagents`；agy profile 额外选 `agy-delegation`、`agy-paseo`、`agy-skills`。AGY 沿用宿主已有 Paseo profiles 与 notes，不在规则中另设模型或 effort 默认值。`paseo-workflow` 仍仅保存，不选入任何已启用快照，也不注入 Paseo。项目、技术栈和业务专属内容不进入通用快照。
 
 ## 本机使用
 
@@ -63,7 +63,7 @@ profiles:
   codex:
     sections: [assets, cost, execution, security, codex-subagents]
   agy:
-    sections: [assets, cost, execution, security, agy-delegation, agy-paseo]
+    sections: [assets, cost, execution, security, agy-delegation, agy-paseo, agy-skills]
   focused:
     sections: [security, execution]
 ```
@@ -109,6 +109,8 @@ node scripts/rules.mjs generate --source . --max-tokens 1800 -o /path/to/AGENTS.
 先在新会话或原生离线 prompt 预览中验证实际规则入口。DSH／Trae 的通用入口链接到稳定本地克隆中的 `rules/generated/AGENTS.md`；Codex 专用入口链接到 `rules/generated/codex/AGENTS.md`。不要按品牌名猜测 `$CODEX_HOME` / `$TRAE_HOME` / `$DSH_HOME`。
 
 AGY 使用专用快照，在本机将 `~/.gemini/AGENTS.md` 软链接到稳定克隆中的 `rules/generated/agy/AGENTS.md`。[AGY 官方规则文档](https://www.antigravity.google/docs/rules/)将此入口列为 App、CLI 与 IDE 支持的全局规则；独立 `AGENTS.md` 不需要 YAML frontmatter。安装前核对已有文件、软链接及其他规则入口，不覆盖未知内容，不同时向 `GEMINI.md` 或模块目录投放重复正文；安装后读回链接和内容，并在新会话验证实际加载。
+
+`agy-skills` 要求 agent 在会话开始时批量扫描共享的 `~/.agents/skills/*/SKILL.md`，先建立名称、描述和路径索引，再按任务读取正文。不单独投放技能副本、技能目录软链接或 `skills.json`；这是 agent 执行规则驱动的发现，不改变 AGY 原生 `/skills` 名录。
 
 完整文件软链接意味着块外内容也共享。若工具需要私有规则，使用自己的本地文件，通过生成器维护相同托管块，并保留其未托管前后缀；不要把私有内容加进共享快照。
 

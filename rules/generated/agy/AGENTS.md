@@ -57,3 +57,9 @@
 - 优先完成通知；没有回调时用可用心跳或定时器有界检查，记录句柄、期限和停止条件，不持续轮询。无法异步续接时明确报告限制。idle 只表示停止运行，验收要读回产物和测试证据。
 - 仅归档本任务创建且已回收的 worker，保留无关会话与改动。CLI 通路和 full-access 均不扩大业务写入、推送或发布授权。
 </managed-section-end:agy-paseo>
+
+<managed-section-start:agy-skills>
+## 共享 Skills
+
+- 会话开始时用确定性工具批量扫描 `~/.agents/skills/*/SKILL.md`，只提取 frontmatter 的 name、description 和文件路径建立技能索引，不批量加载正文。任务匹配后再读取对应 SKILL.md 及必要引用。同名原生技能去重；目录缺失、断链或解析失败须报告。不另建技能副本或软链接。
+</managed-section-end:agy-skills>
