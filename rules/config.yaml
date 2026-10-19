@@ -5,8 +5,13 @@ defaults:
   max_tokens: 2000
   tokenizer: o200k_base
 profiles:
+  # Explicit allowlists keep saved/tool-specific sections out of the shared entrypoint.
   default:
-    sections: ["*"]
+    sections: [assets, cost, execution, security]
+  codex:
+    sections: [assets, cost, execution, security, codex-subagents]
+  agy:
+    sections: [assets, cost, execution, security, agy-delegation, agy-paseo]
 
 # * 或未指定 sections：按 section 文件名的字典序。
 # 显式 sections 数组：按数组顺序。

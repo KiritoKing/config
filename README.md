@@ -6,10 +6,12 @@
 
 - `rules/sections/*.md`：唯一人工维护的规则正文。
 - `rules/config.yaml`：profiles、稳定顺序、tokenizer 与预算。
-- `rules/generated/AGENTS.md`：可复现的 default 快照，提交到 Git；不手改托管内容。
+- `rules/generated/AGENTS.md`：可复现的 default 通用快照；不手改托管内容。
+- `rules/generated/codex/AGENTS.md`：通用规则加 `codex-subagents` 的 Codex 专用快照。
+- `rules/generated/agy/AGENTS.md`：通用规则加 `agy-delegation`、`agy-paseo` 的 AGY 专用快照。
 - `scripts/rules.mjs`：小型、确定性的生成/检查入口。没有模型调用、后台同步、自动软链接安装或账号配置操作。
 
-当前仅包含 `assets`、`cost`、`execution`、`security`。多 agent 与 Paseo 规则暂缓；项目、技术栈和业务专属内容不进入这份全局快照。
+通用 default 只选 `assets`、`cost`、`execution`、`security`；codex profile 额外选 `codex-subagents`；agy profile 额外选 `agy-delegation`、`agy-paseo`。AGY 沿用宿主已有 Paseo profiles 与 notes，不在规则中另设模型或 effort 默认值。`paseo-workflow` 仍仅保存，不选入任何已启用快照，也不注入 Paseo。项目、技术栈和业务专属内容不进入通用快照。
 
 ## 本机使用
 
@@ -32,6 +34,20 @@ node scripts/rules.mjs check --source /path/to/config -o /path/to/AGENTS.md --fi
 
 这些路径是显式输入，不编码在资产正文中。默认 `--source` 为当前目录，默认输出 `./AGENTS.md`；source 可指向仓库根目录或 `rules` 目录。尚未集成到 `aiw rules`，也不替代 harness 原生配置工具。
 
+Codex 专用快照单独生成与检查，不会修改通用快照：
+
+```sh
+node scripts/rules.mjs generate --source . --profile codex -o rules/generated/codex/AGENTS.md
+node scripts/rules.mjs check --source . --profile codex -o rules/generated/codex/AGENTS.md
+```
+
+AGY 专用快照同样独立生成与检查：
+
+```sh
+node scripts/rules.mjs generate --source . --profile agy -o rules/generated/agy/AGENTS.md
+node scripts/rules.mjs check --source . --profile agy -o rules/generated/agy/AGENTS.md
+```
+
 ## Profile 与顺序
 
 ```yaml
@@ -43,12 +59,16 @@ defaults:
   tokenizer: o200k_base
 profiles:
   default:
-    sections: ["*"]
+    sections: [assets, cost, execution, security]
+  codex:
+    sections: [assets, cost, execution, security, codex-subagents]
+  agy:
+    sections: [assets, cost, execution, security, agy-delegation, agy-paseo]
   focused:
     sections: [security, execution]
 ```
 
-显式数组按数组顺序。缺省 `sections` 或单独的 `*` 按模块文件名的字典序。`--sections security,execution` 只筛选当前 profile 的候选，不重排 config，也不能选择 profile 之外的模块。未知 profile、未知或重复模块、空列表与不支持的字段均报错。
+当前 default 使用显式白名单，避免新增工具专用或仅保存的 section 自动进入通用入口。显式数组按数组顺序。缺省 `sections` 或单独的 `*` 按模块文件名的字典序。`--sections security,execution` 只筛选当前 profile 的候选，不重排 config，也不能选择 profile 之外的模块。未知 profile、未知或重复模块、空列表与不支持的字段均报错。
 
 模块名必须匹配 `[a-z][a-z0-9-]*`。`title` 是稳定文件名，不含 `.md`；中文标题写在正文中。
 
@@ -86,7 +106,9 @@ node scripts/rules.mjs generate --source . --max-tokens 1800 -o /path/to/AGENTS.
 
 ## 接入 harness
 
-先在新会话或原生离线 prompt 预览中验证实际规则入口，再将其链接到稳定的本地克隆中的 `rules/generated/AGENTS.md`。不要按品牌名猜测 `$CODEX_HOME` / `$TRAE_HOME` / `$DSH_HOME`。
+先在新会话或原生离线 prompt 预览中验证实际规则入口。DSH／Trae 的通用入口链接到稳定本地克隆中的 `rules/generated/AGENTS.md`；Codex 专用入口链接到 `rules/generated/codex/AGENTS.md`。不要按品牌名猜测 `$CODEX_HOME` / `$TRAE_HOME` / `$DSH_HOME`。
+
+AGY 使用专用快照，在本机将 `~/.gemini/AGENTS.md` 软链接到稳定克隆中的 `rules/generated/agy/AGENTS.md`。[AGY 官方规则文档](https://www.antigravity.google/docs/rules/)将此入口列为 App、CLI 与 IDE 支持的全局规则；独立 `AGENTS.md` 不需要 YAML frontmatter。安装前核对已有文件、软链接及其他规则入口，不覆盖未知内容，不同时向 `GEMINI.md` 或模块目录投放重复正文；安装后读回链接和内容，并在新会话验证实际加载。
 
 完整文件软链接意味着块外内容也共享。若工具需要私有规则，使用自己的本地文件，通过生成器维护相同托管块，并保留其未托管前后缀；不要把私有内容加进共享快照。
 
